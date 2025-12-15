@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: notes-postgres
+    environment:
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_USER: user123
+      POSTGRES_DB: notes_db
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - notes-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user123 -d notes_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: notes-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    networks:
+      - notes-network
+    depends_on:
+      - postgres
+
+networks:
+  notes-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
