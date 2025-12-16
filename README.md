@@ -2,88 +2,90 @@
 
 Цели:
 
-1.	Освоить принципы проектирования REST API.
-2.	Научиться разрабатывать структуру проекта backend-приложения на Go.
-3.	Спроектировать и реализовать CRUD-интерфейс (Create, Read, Update, Delete) для сущности «Заметка».
-4.	Освоить применение слоистой архитектуры (handler → service → repository).
-5.	Подготовить основу для интеграции с базой данных и JWT-аутентификацией в следующих занятиях.
+1.	Научиться находить «узкие места» в SQL-запросах и устранять их (индексы, переписывание запросов, пагинация, батчинг).
+2.	Освоить настройку пула подключений (connection pool) в Go и параметры его тюнинга.
+3.	Научиться использовать EXPLAIN/ANALYZE, базовые метрики (pg_stat_statements), подготовленные запросы и транзакции.
+4.	Применить техники уменьшения N+1 запросов и сокращения аллокаций на горячем пути.
 
 # Выполнение практического задания.
 
+  Для выполнение практики заа основу был взят из практики 11
+  
 1. Структура проекта
 
   Для выполнения практической работы была сделана следующая структура проекта
 
-<img width="174" height="337" alt="image" src="https://github.com/user-attachments/assets/fd1fd290-60ee-4d61-a66e-eb7bb61010d4" />
-
+<img width="248" height="446" alt="image" src="https://github.com/user-attachments/assets/f39c9528-3a8f-4fe9-98f8-fca355aac546" />
 
    Так же были установлены все необходимые расширения для выполнения практики
 
-<img width="979" height="147" alt="Снимок экрана 2025-11-17 033223" src="https://github.com/user-attachments/assets/9ea8d6af-1a6e-497f-ae17-d90972f5fa5e" />
+<img width="630" height="177" alt="Снимок экрана 2025-12-13 200055" src="https://github.com/user-attachments/assets/a7280373-7ef5-4b01-ae19-a8eb4b423b7a" />
 
+2.	Docker-Compose.
+  Для реализации контейнеризации практики был написан файл docker-compose.yml
 
+<img width="470" height="411" alt="image" src="https://github.com/user-attachments/assets/c94acb7d-c301-4041-81fb-d2d3babd90c5" />
 
-2.	Модель данных.
-  Для реализации практики была написана модель в файл note.go
+3. Миграция.
+ Для реализациии миграции в Postgres-контейнера, был написан файл init.sql
 
-<img width="244" height="212" alt="image" src="https://github.com/user-attachments/assets/f4f1107a-35f1-4915-a4e6-c9d7ae02f64c" />
+<img width="406" height="470" alt="image" src="https://github.com/user-attachments/assets/27df865b-1d36-4a37-8b70-6759208ae0c8" />
 
+4. Конфигурация.
 
-3. In-memory репозиторий.
- Для выполнения практики была написана файл note_mem.go. В котором реализован CRUD для обработки заметок.
+   Был написан файл конфигурации config.go для подлкючения к Postgres-контейнера
 
-<img width="450" height="1008" alt="image" src="https://github.com/user-attachments/assets/df4b0477-84dc-43c6-a7e3-2e9c8df198f1" />
-
-
-4. HTTP-обработчик.
-
-   Затем был создан файл notes.go, в котором происходит обработка запросов
-
-<img width="435" height="994" alt="image" src="https://github.com/user-attachments/assets/2aa91438-cc07-45ef-bb61-e42ebd9e27a5" />
-
-
-  
+<img width="540" height="302" alt="image" src="https://github.com/user-attachments/assets/2fd44002-3787-4ac3-9947-15b4a0749856" />
  
-5. Маршрутизация
+5. Postgres и интерфейс репозиторий.
 
-  После был напиисан router.go, где осуществляется мушрутизация
+  Для выполнения практики была написана файл note_pg.go. В котором реализован CRUD для обработки заметок при помощи Postgres-контейнера. Фрагмент фаайла
 
-<img width="368" height="279" alt="image" src="https://github.com/user-attachments/assets/74ed1a48-1aa1-4a30-87f4-2acb5c3b84a8" />
+<img width="862" height="573" alt="image" src="https://github.com/user-attachments/assets/745a99b9-5b57-4c32-9f89-e39733cefb90" />
 
-6. Точка входа
 
-   Для запуска сервера был написан main.go
+6. Поиск и пагинация: OFFSET vs keyset
 
-<img width="364" height="289" alt="image" src="https://github.com/user-attachments/assets/01f5cbba-3639-412d-9cb7-cccfc9600401" />
+   Для реализации Keyset-пагинация была напиисана функция в note_pg.go
+   
+<img width="850" height="512" alt="image" src="https://github.com/user-attachments/assets/3bd8292a-ca91-42c7-9cf4-12ff1dbfb7ce" />
 
+7. Устранение N+1 (батчинг)
+
+  Для реализации батчинга была напиисана функция в note_pg.go
+
+  <img width="683" height="338" alt="image" src="https://github.com/user-attachments/assets/c08064af-2f43-4640-beaa-340ece9eaf1d" />
 
 # Проверка работоспособности
 
-  Для проверки работоспособности был запущен сервер, после в Postman были проверено:
+  Для проверки работоспособности был запущен контейнер в Docker:
 
-  Создание заметки
+  <img width="815" height="91" alt="image" src="https://github.com/user-attachments/assets/35d44b77-a1ca-471a-a7a1-a7f83a98e7b7" />
 
-<img width="691" height="412" alt="image" src="https://github.com/user-attachments/assets/43696791-2d50-4a7d-be25-89a40aa3b95e" />
+  Нагрузочное тестирование
 
+  Тестирование обычной пагинации
 
-  Вывод всех заметок 
+<img width="829" height="722" alt="image" src="https://github.com/user-attachments/assets/0b5cfe40-f2e0-44b5-805a-f302f5e8e5c2" />
 
-<img width="697" height="634" alt="image" src="https://github.com/user-attachments/assets/874f2056-fc1f-4e49-8349-ca7042eadbeb" />
+  Тестирование keyset-пагинации
 
-  Вывод определенной заметки
+<img width="873" height="739" alt="image" src="https://github.com/user-attachments/assets/57dfa019-3ba4-4844-b4f2-e83f98497e05" />
 
-<img width="525" height="414" alt="image" src="https://github.com/user-attachments/assets/fef10779-b872-4cfb-97be-3083eece7ad5" />
+  Тестирование батчинга
 
+<img width="865" height="737" alt="image" src="https://github.com/user-attachments/assets/6e86adb8-28d1-4cf4-8658-07d509b938d2" />
 
-  Обновить заметку
+  Тестирование получения одной заметки
 
-<img width="721" height="422" alt="image" src="https://github.com/user-attachments/assets/48257205-b95b-4f17-8613-02d49551addf" />
+<img width="741" height="723" alt="image" src="https://github.com/user-attachments/assets/94e4086c-eeea-48a0-8f6f-e707cd49585b" />
 
-  Удалить заметку
+# Анализ запросов в PostgreSQL
 
-<img width="711" height="348" alt="image" src="https://github.com/user-attachments/assets/31957b1f-cd5e-488d-964a-bc2bc57c2bc4" />
+  Анализ запроса с пагинацией
 
+<img width="816" height="248" alt="image" src="https://github.com/user-attachments/assets/f85bcc27-ae32-481d-a430-48fa25c7ae69" />
 
- После удаления
-
-<img width="700" height="547" alt="image" src="https://github.com/user-attachments/assets/c7163699-671b-44ae-8ecc-148ba3884997" />
+  Анализ keyset-пагинациb
+  
+<img width="815" height="270" alt="image" src="https://github.com/user-attachments/assets/0f7cfbb2-f8bd-4b7f-bf9c-21282f293f60" />
